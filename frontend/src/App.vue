@@ -19,6 +19,16 @@ const newPageContent = ref('')
 const isLoading = ref(false)
 const error = ref(null)
 
+const formatPageTitle = (pageName) => {
+  // Convertir el nombre del archivo en un título legible
+  return pageName
+    .replace('news-', '')
+    .replace('.md', '')
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 const loadPages = async () => {
   try {
     isLoading.value = true
@@ -92,17 +102,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col">
+  <div class="min-h-screen bg-gray-50 flex flex-col">
     <!-- Header -->
     <header class="bg-white shadow z-10 sticky top-0">
       <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-gray-900">📘 Wiki Console</h1>
-        <button
-          @click="showNewPageModal = true"
-          class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md"
-        >
-          + Nueva Página
-        </button>
+        <h1 class="text-xl font-bold text-gray-900">📰 Noticias Diarias</h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-500">{{ new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</span>
+        </div>
       </div>
     </header>
 
@@ -111,18 +118,18 @@ onMounted(() => {
       <!-- Sidebar -->
       <aside class="w-64 bg-white border-r overflow-y-auto">
         <div class="p-4">
-          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Páginas</h2>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Noticias</h2>
           <ul class="space-y-1">
             <li
               v-for="page in pages"
               :key="page"
               @click="loadPage(page)"
               :class="[
-                'block px-3 py-2 rounded-md text-sm font-medium cursor-pointer',
-                currentPage === page ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-200'
+                'block px-3 py-2 rounded-md text-sm font-medium cursor-pointer hover:bg-gray-50',
+                currentPage === page ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'text-gray-700'
               ]"
             >
-              {{ page }}
+              {{ formatPageTitle(page) }}
             </li>
           </ul>
         </div>
@@ -134,11 +141,13 @@ onMounted(() => {
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
         <div v-else>
-          <div v-if="currentPage" class="prose max-w-none">
-            <div v-html="renderedContent" class="markdown-content"></div>
+          <div v-if="currentPage" class="max-w-4xl mx-auto">
+            <article class="bg-white rounded-lg shadow-sm p-6">
+              <div v-html="renderedContent" class="markdown-content"></div>
+            </article>
           </div>
           <div v-else class="text-center text-gray-500">
-            <p>Selecciona o crea una página para comenzar</p>
+            <p>Selecciona una noticia para leer</p>
           </div>
         </div>
       </main>
@@ -171,184 +180,65 @@ onMounted(() => {
 /* Estilos base */
 .markdown-content {
   color: #1f2937;
-  font-size: 1rem;
+  font-size: 1.125rem;
   line-height: 1.75;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 /* Encabezados */
 .markdown-content h1 {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 800;
   margin-bottom: 1.5rem;
   color: #111827;
-}
-
-.markdown-content h2 {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  margin-top: 2rem;
-  color: #111827;
-}
-
-.markdown-content h3 {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  margin-top: 1.5rem;
-  color: #111827;
-}
-
-.markdown-content h4 {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  margin-top: 1.25rem;
-  color: #111827;
-}
-
-.markdown-content h5 {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  margin-top: 1.25rem;
-  color: #111827;
-}
-
-.markdown-content h6 {
-  font-size: 1rem;
-  line-height: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  margin-top: 1.25rem;
-  color: #111827;
+  letter-spacing: -0.025em;
 }
 
 /* Párrafos y texto */
 .markdown-content p {
-  margin-bottom: 1rem;
-  line-height: 1.625;
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+  color: #374151;
 }
 
 .markdown-content strong {
   font-weight: 700;
-}
-
-.markdown-content em {
-  font-style: italic;
-}
-
-.markdown-content del,
-.markdown-content s {
-  text-decoration: line-through;
-}
-
-/* Listas */
-.markdown-content ul,
-.markdown-content ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-.markdown-content ul {
-  list-style-type: disc;
-}
-
-.markdown-content ol {
-  list-style-type: decimal;
-}
-
-.markdown-content li {
-  margin-bottom: 0.5rem;
-  color: #374151;
-}
-
-.markdown-content li > ul,
-.markdown-content li > ol {
-  margin-top: 0.5rem;
-  margin-bottom: 0;
+  color: #111827;
 }
 
 /* Enlaces */
 .markdown-content a {
   color: #2563eb;
-  text-decoration: underline;
+  text-decoration: none;
+  border-bottom: 1px solid #93c5fd;
+  transition: all 0.2s;
 }
 
 .markdown-content a:hover {
   color: #1d4ed8;
+  border-bottom-color: #1d4ed8;
 }
 
 /* Citas */
 .markdown-content blockquote {
-  border-left: 4px solid #d1d5db;
-  padding: 0.5rem 1rem;
-  margin: 1rem 0;
-  color: #4b5563;
+  border-left: 4px solid #3b82f6;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  background-color: #f8fafc;
+  border-radius: 0.375rem;
   font-style: italic;
-}
-
-.markdown-content blockquote > * {
-  margin: 0.5rem 0;
-}
-
-.markdown-content blockquote blockquote {
-  border-left-width: 2px;
-  margin-left: 1rem;
+  color: #4b5563;
 }
 
 /* Código */
 .markdown-content code {
-  background-color: #f3f4f6;
+  background-color: #f1f5f9;
   border-radius: 0.25rem;
-  padding: 0.125rem 0.25rem;
+  padding: 0.2rem 0.4rem;
   font-size: 0.875rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-.markdown-content pre {
-  background-color: #f3f4f6;
-  border-radius: 0.25rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  overflow-x: auto;
-}
-
-.markdown-content pre code {
-  background-color: transparent;
-  padding: 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-/* Tablas */
-.markdown-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-}
-
-.markdown-content th {
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 1rem;
-  text-align: left;
-  font-weight: 600;
-}
-
-.markdown-content td {
-  border: 1px solid #d1d5db;
-  padding: 0.5rem 1rem;
-}
-
-.markdown-content th[style*="text-align:right"],
-.markdown-content td[style*="text-align:right"] {
-  text-align: right;
+  color: #0f172a;
 }
 
 /* Imágenes */
@@ -357,109 +247,33 @@ onMounted(() => {
   height: auto;
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  margin: 1rem 0;
+  margin: 1.5rem 0;
 }
 
 /* Líneas horizontales */
 .markdown-content hr {
   margin: 2rem 0;
   border: 0;
-  border-top: 1px solid #d1d5db;
+  border-top: 2px solid #e5e7eb;
 }
 
-/* Caracteres especiales */
-.markdown-content sup {
-  vertical-align: super;
-  font-size: smaller;
-}
-
-.markdown-content sub {
-  vertical-align: sub;
-  font-size: smaller;
-}
-
-/* Definiciones */
-.markdown-content dl {
-  margin: 1rem 0;
-}
-
-.markdown-content dt {
-  font-weight: 600;
-  margin-top: 1rem;
-}
-
-.markdown-content dd {
-  margin-left: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Notas al pie */
-.markdown-content .footnotes {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #d1d5db;
+/* Estilos para la fecha y fuente */
+.markdown-content p:first-of-type {
+  color: #6b7280;
   font-size: 0.875rem;
+  margin-bottom: 2rem;
 }
 
-.markdown-content .footnotes ol {
-  padding-left: 1.5rem;
+.markdown-content p:first-of-type strong {
+  color: #4b5563;
+  font-weight: 600;
 }
 
-.markdown-content .footnotes li {
-  margin-bottom: 0.5rem;
-}
-
-.markdown-content .footnote-ref {
-  text-decoration: none;
-  font-size: 0.75rem;
-  vertical-align: super;
-}
-
-.markdown-content .footnote-backref {
-  text-decoration: none;
-  margin-left: 0.25rem;
-}
-
-/* Contenedores personalizados */
-.markdown-content .warning {
-  background-color: #fef2f2;
-  border-left: 4px solid #ef4444;
-  padding: 1rem;
-  margin: 1rem 0;
-  border-radius: 0.25rem;
-}
-
-/* Abreviaturas */
-.markdown-content abbr {
-  border-bottom: 1px dotted #6b7280;
-  cursor: help;
-}
-
-/* Texto insertado y marcado */
-.markdown-content ins {
-  text-decoration: underline;
-  background-color: #dcfce7;
-}
-
-.markdown-content mark {
-  background-color: #fef08a;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.125rem;
-}
-
-/* Emojis */
-.markdown-content img.emoji {
-  height: 1em;
-  width: 1em;
-  margin: 0 0.05em 0 0.1em;
-  vertical-align: -0.1em;
-  box-shadow: none;
-}
-
-/* Separador de notas al pie */
-.markdown-content .footnotes-sep {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+/* Estilos para el contenido principal */
+.markdown-content p:not(:first-of-type) {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #1f2937;
 }
 </style>
 

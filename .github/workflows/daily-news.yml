@@ -1,0 +1,39 @@
+name: Daily News Markdown
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # Todos los días a las 7:00 UTC
+  workflow_dispatch:     # Permite ejecución manual
+
+jobs:
+  fetch-and-commit-news:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Instalar dependencias (si es necesario)
+        run: go mod tidy
+
+      - name: Ejecutar script para obtener noticia y crear markdown
+        env:
+          NEWSAPI_KEY: d62ce3293c6f4065bcd1f01b0c082277
+        run: |
+          go run .github/scripts/fetch_news.go
+
+      - name: Configurar usuario git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Commit y push si hay cambios
+        run: |
+          git add content/
+          git diff --cached --quiet || git commit -m "chore: noticia diaria automática"
+          git push

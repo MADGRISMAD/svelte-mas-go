@@ -8,10 +8,17 @@ on:
 jobs:
   fetch-and-commit-news:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,10 +40,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Commit y push si hay cambios
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git remote set-url origin https://${{ github.actor }}:${GH_PAT}@github.com/${{ github.repository }}
           git add content/
           git diff --cached --quiet || git commit -m "chore: noticia diaria automática"
-          git push origin HEAD
+          git push

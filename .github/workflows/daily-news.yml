@@ -30,7 +30,10 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Commit y push si hay cambios
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git add content/
           git diff --cached --quiet || git commit -m "chore: noticia diaria automática"
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
           git push

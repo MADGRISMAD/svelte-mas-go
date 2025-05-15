@@ -18,9 +18,6 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Instalar dependencias (si es necesario)
-        run: go mod tidy
-
       - name: Ejecutar script para obtener noticia y crear markdown
         env:
           NEWSAPI_KEY: d62ce3293c6f4065bcd1f01b0c082277

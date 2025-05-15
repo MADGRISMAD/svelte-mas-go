@@ -2,7 +2,7 @@ name: Daily News Markdown
 
 on:
   schedule:
-    - cron: '0 7 * * *' # Todos los días a las 7:00 UTC
+    - cron: '0 14 * * *' # Todos los días a las 7:00 UTC
   workflow_dispatch:     # Permite ejecución manual
 
 jobs:

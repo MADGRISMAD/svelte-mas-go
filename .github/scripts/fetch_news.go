@@ -15,7 +15,9 @@ const (
 )
 
 type NewsResponse struct {
-	Articles []struct {
+	Status       string `json:"status"`
+	TotalResults int    `json:"totalResults"`
+	Articles     []struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		Content     string `json:"content"`
@@ -27,25 +29,52 @@ type NewsResponse struct {
 	} `json:"articles"`
 }
 
+type ErrorResponse struct {
+	Status  string `json:"status"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 func main() {
 	apiKey := os.Getenv("NEWSAPI_KEY")
 	if apiKey == "" {
 		panic("NEWSAPI_KEY no está definido")
 	}
 
-	req, _ := http.NewRequest("GET", newsAPIURL, nil)
-	req.Header.Set("Authorization", apiKey)
+	// Construir URL con API key
+	url := fmt.Sprintf("%s&apiKey=%s", newsAPIURL, apiKey)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		panic(fmt.Sprintf("Error creando request: %v", err))
+	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error haciendo request: %v", err))
 	}
 	defer resp.Body.Close()
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(fmt.Sprintf("Error leyendo respuesta: %v", err))
+	}
+
+	// Intentar decodificar como error primero
+	var errorResp ErrorResponse
+	if err := json.Unmarshal(body, &errorResp); err == nil && errorResp.Status == "error" {
+		panic(fmt.Sprintf("Error de API: %s - %s", errorResp.Code, errorResp.Message))
+	}
+
+	// Si no es error, decodificar como respuesta normal
 	var news NewsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&news); err != nil {
-		panic(err)
+	if err := json.Unmarshal(body, &news); err != nil {
+		panic(fmt.Sprintf("Error decodificando respuesta: %v", err))
+	}
+
+	if news.Status != "ok" {
+		panic(fmt.Sprintf("Estado de respuesta no OK: %s", news.Status))
 	}
 
 	if len(news.Articles) == 0 {
@@ -68,7 +97,7 @@ func main() {
 `, article.Title, article.Source.Name, article.URL, article.PublishedAt[:10], article.Description, article.Content)
 
 	if err := ioutil.WriteFile(filename, []byte(mdContent), 0644); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error guardando archivo: %v", err))
 	}
 
 	fmt.Println("Noticia guardada en:", filename)

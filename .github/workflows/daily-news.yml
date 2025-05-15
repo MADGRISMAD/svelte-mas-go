@@ -36,7 +36,7 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n x-access-token:${GH_PAT} | base64)"
+          git remote set-url origin https://${{ github.actor }}:${GH_PAT}@github.com/${{ github.repository }}
           git add content/
           git diff --cached --quiet || git commit -m "chore: noticia diaria automática"
           git push origin HEAD

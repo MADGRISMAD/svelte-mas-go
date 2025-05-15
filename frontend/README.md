@@ -23,7 +23,7 @@ Una aplicación web moderna para visualizar noticias diarias, construida con Vue
 - npm o yarn
 
 ## 🔧 Instalación
-
+a
 1. Clona el repositorio:
 ```bash
 git clone [URL_DEL_REPOSITORIO]

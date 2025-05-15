@@ -36,4 +36,4 @@ jobs:
           git add content/
           git diff --cached --quiet || git commit -m "chore: noticia diaria automática"
           git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
-          git push
+          git push origin HEAD
